@@ -25,11 +25,9 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Original Bot Studio Route */}
-            <Route path="/" element={<Dashboard />} />
-
-            {/* Admin Routes with Sidebar */}
+            {/* All Routes with Sidebar via AppLayout */}
             <Route path="/" element={<AppLayout />}>
+              <Route index element={<Dashboard />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/search-history" element={<SearchHistory />} />
               <Route path="/conversation-filters" element={<ConversationFilters />} />
