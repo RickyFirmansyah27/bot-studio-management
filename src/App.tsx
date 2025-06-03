@@ -7,6 +7,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BotProvider } from "@/contexts/BotContext";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import AppLayout from "./components/AppLayout";
+import AdminDashboard from "./pages/AdminDashboard";
+import SearchHistory from "./pages/SearchHistory";
+import ConversationFilters from "./pages/ConversationFilters";
+import TotalUsers from "./pages/analytics/TotalUsers";
+import ActiveSessions from "./pages/analytics/ActiveSessions";
+import MessageVolume from "./pages/analytics/MessageVolume";
 
 const queryClient = new QueryClient();
 
@@ -18,8 +25,20 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Original Bot Studio Route */}
             <Route path="/" element={<Dashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+            {/* Admin Routes with Sidebar */}
+            <Route path="/" element={<AppLayout />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/search-history" element={<SearchHistory />} />
+              <Route path="/conversation-filters" element={<ConversationFilters />} />
+              <Route path="/analytics/users" element={<TotalUsers />} />
+              <Route path="/analytics/sessions" element={<ActiveSessions />} />
+              <Route path="/analytics/messages" element={<MessageVolume />} />
+            </Route>
+            
+            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
