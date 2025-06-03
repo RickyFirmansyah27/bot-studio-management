@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +17,7 @@ const TotalUsers: React.FC = () => {
 
   const cityData = [
     { city: 'Jakarta', users: 320, percentage: 35 },
-    { city: 'Bandung', users: 180, users: 20 },
+    { city: 'Bandung', users: 180, percentage: 20 },
     { city: 'Surabaya', users: 150, percentage: 16 },
     { city: 'Medan', users: 120, percentage: 13 },
     { city: 'Others', users: 150, percentage: 16 },
