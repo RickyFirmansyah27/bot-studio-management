@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { useBotContext } from '@/contexts/BotContext';
 import { Bot, Plus, Trash2, Power, Settings, Crown } from 'lucide-react';
@@ -73,7 +74,7 @@ const BotManagement: React.FC = () => {
     deleteBot(botId);
     toast({
       title: "Bot Deleted",
-      description: `Bot "${botName}" has been deleted`,
+      description: `Bot "${botName}" has been deleted successfully`,
     });
   };
 
@@ -122,6 +123,11 @@ const BotManagement: React.FC = () => {
                     onChange={(e) => setNewBotName(e.target.value)}
                     placeholder="Enter bot name"
                     className="col-span-3"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleCreateBot();
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -135,45 +141,52 @@ const BotManagement: React.FC = () => {
         </div>
       </div>
 
+      {/* Usage Limits Card */}
       <div className="mb-6">
         <Card>
           <CardHeader>
             <CardTitle>Usage Limits</CardTitle>
-            <CardDescription>Your current bot usage</CardDescription>
+            <CardDescription>Your current bot usage and limits</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Bots Created</span>
               <span className="text-sm text-gray-600">
                 {userTier.botsCreated} / {getMaxBots()}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
               <div 
-                className="bg-blue-600 h-2 rounded-full" 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                 style={{ width: `${(userTier.botsCreated / getMaxBots()) * 100}%` }}
               ></div>
             </div>
             {userTier.plan === 'free' && (
-              <p className="text-xs text-gray-500 mt-2">
-                Upgrade to Premium to create up to 5 bots
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-700">
+                  💡 Upgrade to Premium to create up to 5 bots and unlock advanced features
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
+      {/* Bot Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {allBots.map((bot) => (
-          <Card key={bot.id} className={`relative ${bot.id === botConfig.id ? 'ring-2 ring-blue-500' : ''}`}>
+          <Card key={bot.id} className={`relative transition-all duration-200 ${bot.id === botConfig.id ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:shadow-md'}`}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center">
-                  <Bot className="w-5 h-5 mr-2" />
+                  <Bot className="w-5 h-5 mr-2 text-blue-600" />
                   {bot.name}
                 </CardTitle>
                 {bot.id === botConfig.id && (
-                  <Badge variant="default">Active</Badge>
+                  <Badge variant="default" className="bg-green-500">
+                    <Power className="w-3 h-3 mr-1" />
+                    Active
+                  </Badge>
                 )}
               </div>
               <CardDescription>
@@ -183,17 +196,19 @@ const BotManagement: React.FC = () => {
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Welcome Message:</p>
-                  <p className="text-sm text-gray-600 truncate">{bot.welcomeMessage}</p>
+                  <p className="text-sm font-medium text-gray-700 mb-1">Welcome Message:</p>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded text-wrap">
+                    {bot.welcomeMessage}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Tone:</p>
-                  <Badge variant="outline" className="text-xs">
+                  <p className="text-sm font-medium text-gray-700 mb-1">Tone:</p>
+                  <Badge variant="outline" className="text-xs capitalize">
                     {bot.tone}
                   </Badge>
                 </div>
                 
-                <div className="flex space-x-2 pt-2">
+                <div className="flex space-x-2 pt-3 border-t">
                   {bot.id !== botConfig.id && (
                     <Button 
                       size="sm" 
@@ -219,13 +234,35 @@ const BotManagement: React.FC = () => {
                   )}
                   
                   {allBots.length > 1 && (
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDeleteBot(bot.id, bot.name)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          className="px-3"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Bot</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "<strong>{bot.name}</strong>"? 
+                            This action cannot be undone and all bot data will be permanently removed.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleDeleteBot(bot.id, bot.name)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete Bot
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
               </div>
@@ -233,6 +270,19 @@ const BotManagement: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* Empty State */}
+      {allBots.length === 0 && (
+        <div className="text-center py-12">
+          <Bot className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No bots created yet</h3>
+          <p className="text-gray-600 mb-4">Get started by creating your first chatbot</p>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Your First Bot
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
