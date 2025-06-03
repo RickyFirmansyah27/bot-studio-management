@@ -9,7 +9,8 @@ import {
   Activity, 
   MessageSquare,
   Settings,
-  Bot
+  Bot,
+  Cog
 } from 'lucide-react';
 import {
   Sidebar,
@@ -29,6 +30,11 @@ const mainMenuItems = [
     title: 'Bot Studio',
     url: '/',
     icon: Bot,
+  },
+  {
+    title: 'Bot Management',
+    url: '/bot-management',
+    icon: Cog,
   },
 ];
 

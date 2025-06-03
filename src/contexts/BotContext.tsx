@@ -2,9 +2,12 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface BotConfig {
+  id: string;
   name: string;
   welcomeMessage: string;
   tone: 'friendly' | 'formal' | 'neutral';
+  isActive: boolean;
+  createdAt: string;
 }
 
 export interface UserTier {
@@ -16,13 +19,18 @@ export interface UserTier {
 
 interface BotContextType {
   botConfig: BotConfig;
+  allBots: BotConfig[];
   userTier: UserTier;
   updateBotConfig: (config: Partial<BotConfig>) => void;
+  createNewBot: (name: string) => boolean;
+  switchBot: (botId: string) => void;
+  deleteBot: (botId: string) => void;
   incrementMessageUsage: () => void;
   incrementUrlPages: (count: number) => void;
   canSendMessage: () => boolean;
   canAddUrlPages: (count: number) => boolean;
   canCreateBot: () => boolean;
+  getMaxBots: () => number;
 }
 
 const BotContext = createContext<BotContextType | undefined>(undefined);
@@ -33,12 +41,23 @@ const FREE_TIER_LIMITS = {
   maxBots: 1,
 };
 
+const PREMIUM_TIER_LIMITS = {
+  maxBots: 5,
+};
+
 export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [botConfig, setBotConfig] = useState<BotConfig>({
-    name: 'My Chatbot',
-    welcomeMessage: 'Hello! How can I help you today?',
-    tone: 'friendly',
-  });
+  const [allBots, setAllBots] = useState<BotConfig[]>([
+    {
+      id: '1',
+      name: 'My Chatbot',
+      welcomeMessage: 'Hello! How can I help you today?',
+      tone: 'friendly',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    }
+  ]);
+
+  const [activeBotId, setActiveBotId] = useState('1');
 
   const [userTier, setUserTier] = useState<UserTier>({
     plan: 'free',
@@ -47,8 +66,59 @@ export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     botsCreated: 1,
   });
 
+  const botConfig = allBots.find(bot => bot.id === activeBotId) || allBots[0];
+
+  const getMaxBots = () => {
+    return userTier.plan === 'premium' ? PREMIUM_TIER_LIMITS.maxBots : FREE_TIER_LIMITS.maxBots;
+  };
+
   const updateBotConfig = (config: Partial<BotConfig>) => {
-    setBotConfig(prev => ({ ...prev, ...config }));
+    setAllBots(prev => prev.map(bot => 
+      bot.id === activeBotId ? { ...bot, ...config } : bot
+    ));
+  };
+
+  const createNewBot = (name: string): boolean => {
+    if (!canCreateBot()) return false;
+
+    const newBot: BotConfig = {
+      id: Date.now().toString(),
+      name,
+      welcomeMessage: 'Hello! How can I help you today?',
+      tone: 'friendly',
+      isActive: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setAllBots(prev => [...prev, newBot]);
+    setUserTier(prev => ({ ...prev, botsCreated: prev.botsCreated + 1 }));
+    return true;
+  };
+
+  const switchBot = (botId: string) => {
+    setAllBots(prev => prev.map(bot => ({
+      ...bot,
+      isActive: bot.id === botId
+    })));
+    setActiveBotId(botId);
+  };
+
+  const deleteBot = (botId: string) => {
+    if (allBots.length <= 1) return; // Can't delete the last bot
+    
+    setAllBots(prev => prev.filter(bot => bot.id !== botId));
+    setUserTier(prev => ({ ...prev, botsCreated: Math.max(0, prev.botsCreated - 1) }));
+    
+    if (activeBotId === botId) {
+      const remainingBots = allBots.filter(bot => bot.id !== botId);
+      if (remainingBots.length > 0) {
+        setActiveBotId(remainingBots[0].id);
+        setAllBots(prev => prev.map(bot => ({
+          ...bot,
+          isActive: bot.id === remainingBots[0].id
+        })));
+      }
+    }
   };
 
   const incrementMessageUsage = () => {
@@ -76,21 +146,26 @@ export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const canCreateBot = () => {
-    if (userTier.plan === 'premium') return true;
-    return userTier.botsCreated < FREE_TIER_LIMITS.maxBots;
+    const maxBots = getMaxBots();
+    return userTier.botsCreated < maxBots;
   };
 
   return (
     <BotContext.Provider
       value={{
         botConfig,
+        allBots,
         userTier,
         updateBotConfig,
+        createNewBot,
+        switchBot,
+        deleteBot,
         incrementMessageUsage,
         incrementUrlPages,
         canSendMessage,
         canAddUrlPages,
         canCreateBot,
+        getMaxBots,
       }}
     >
       {children}

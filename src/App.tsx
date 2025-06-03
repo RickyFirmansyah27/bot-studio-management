@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import ConversationFilters from "./pages/ConversationFilters";
 import TotalUsers from "./pages/analytics/TotalUsers";
 import ActiveSessions from "./pages/analytics/ActiveSessions";
 import MessageVolume from "./pages/analytics/MessageVolume";
+import BotManagement from "./pages/BotManagement";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +28,7 @@ const App = () => (
             {/* All Routes with Sidebar via AppLayout */}
             <Route path="/" element={<AppLayout />}>
               <Route index element={<Dashboard />} />
+              <Route path="/bot-management" element={<BotManagement />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/search-history" element={<SearchHistory />} />
               <Route path="/conversation-filters" element={<ConversationFilters />} />
