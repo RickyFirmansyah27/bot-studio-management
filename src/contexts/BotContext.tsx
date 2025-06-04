@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 export interface BotConfig {
   id: string;
@@ -18,7 +19,7 @@ export interface UserTier {
 }
 
 interface BotContextType {
-  botConfig: BotConfig;
+  botConfig: BotConfig | null;
   allBots: BotConfig[];
   userTier: UserTier;
   updateBotConfig: (config: Partial<BotConfig>) => void;
@@ -46,33 +47,35 @@ const PREMIUM_TIER_LIMITS = {
 };
 
 export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [allBots, setAllBots] = useState<BotConfig[]>([
-    {
-      id: '1',
-      name: 'My Chatbot',
-      welcomeMessage: 'Hello! How can I help you today?',
-      tone: 'friendly',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-    }
-  ]);
-
-  const [activeBotId, setActiveBotId] = useState('1');
-
+  const { user } = useAuth();
+  const [allBots, setAllBots] = useState<BotConfig[]>([]);
+  const [activeBotId, setActiveBotId] = useState<string | null>(null);
   const [userTier, setUserTier] = useState<UserTier>({
     plan: 'free',
     urlPagesUsed: 0,
     monthlyMessagesUsed: 0,
-    botsCreated: 1,
+    botsCreated: 0,
   });
 
-  const botConfig = allBots.find(bot => bot.id === activeBotId) || allBots[0];
+  // Update user tier berdasarkan data user dari AuthContext
+  useEffect(() => {
+    if (user) {
+      setUserTier(prev => ({
+        ...prev,
+        plan: user.plan,
+      }));
+    }
+  }, [user]);
+
+  const botConfig = allBots.find(bot => bot.id === activeBotId) || null;
 
   const getMaxBots = () => {
     return userTier.plan === 'premium' ? PREMIUM_TIER_LIMITS.maxBots : FREE_TIER_LIMITS.maxBots;
   };
 
   const updateBotConfig = (config: Partial<BotConfig>) => {
+    if (!activeBotId) return;
+    
     setAllBots(prev => prev.map(bot => 
       bot.id === activeBotId ? { ...bot, ...config } : bot
     ));
@@ -92,6 +95,16 @@ export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setAllBots(prev => [...prev, newBot]);
     setUserTier(prev => ({ ...prev, botsCreated: prev.botsCreated + 1 }));
+    
+    // Set sebagai bot aktif jika ini bot pertama
+    if (allBots.length === 0) {
+      setActiveBotId(newBot.id);
+      setAllBots(prev => prev.map(bot => ({
+        ...bot,
+        isActive: bot.id === newBot.id
+      })));
+    }
+    
     return true;
   };
 
@@ -104,7 +117,7 @@ export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const deleteBot = (botId: string) => {
-    if (allBots.length <= 1) return; // Can't delete the last bot
+    if (allBots.length <= 1) return;
     
     setAllBots(prev => prev.filter(bot => bot.id !== botId));
     setUserTier(prev => ({ ...prev, botsCreated: Math.max(0, prev.botsCreated - 1) }));
@@ -117,6 +130,8 @@ export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           ...bot,
           isActive: bot.id === remainingBots[0].id
         })));
+      } else {
+        setActiveBotId(null);
       }
     }
   };
