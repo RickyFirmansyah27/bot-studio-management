@@ -2,56 +2,26 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Label } from '@/components/ui/label';
 import { useBotContext } from '@/contexts/BotContext';
 import { Bot, Plus, Trash2, Power, Settings, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CreateBotForm from '@/components/CreateBotForm';
 
 const BotManagement: React.FC = () => {
   const { 
     allBots, 
     botConfig, 
     userTier, 
-    createNewBot, 
     switchBot, 
     deleteBot, 
     canCreateBot, 
     getMaxBots 
   } = useBotContext();
   const { toast } = useToast();
-  const [newBotName, setNewBotName] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
-  const handleCreateBot = () => {
-    if (!newBotName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a bot name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const success = createNewBot(newBotName.trim());
-    if (success) {
-      toast({
-        title: "Success",
-        description: `Bot "${newBotName}" created successfully!`,
-      });
-      setNewBotName('');
-      setIsCreateDialogOpen(false);
-    } else {
-      toast({
-        title: "Error", 
-        description: `You have reached the maximum number of bots (${getMaxBots()}) for your plan`,
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleSwitchBot = (botId: string) => {
     switchBot(botId);
@@ -105,37 +75,8 @@ const BotManagement: React.FC = () => {
                 Create New Bot
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Bot</DialogTitle>
-                <DialogDescription>
-                  Give your new chatbot a name. You can configure its settings after creation.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={newBotName}
-                    onChange={(e) => setNewBotName(e.target.value)}
-                    placeholder="Enter bot name"
-                    className="col-span-3"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleCreateBot();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit" onClick={handleCreateBot}>
-                  Create Bot
-                </Button>
-              </DialogFooter>
+            <DialogContent className="max-w-lg">
+              <CreateBotForm onClose={() => setIsCreateDialogOpen(false)} />
             </DialogContent>
           </Dialog>
         </div>
@@ -175,14 +116,14 @@ const BotManagement: React.FC = () => {
       {/* Bot Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {allBots.map((bot) => (
-          <Card key={bot.id} className={`relative transition-all duration-200 ${bot.id === botConfig.id ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:shadow-md'}`}>
+          <Card key={bot.id} className={`relative transition-all duration-200 ${bot.id === botConfig?.id ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:shadow-md'}`}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center">
                   <Bot className="w-5 h-5 mr-2 text-blue-600" />
                   {bot.name}
                 </CardTitle>
-                {bot.id === botConfig.id && (
+                {bot.id === botConfig?.id && (
                   <Badge variant="default" className="bg-green-500">
                     <Power className="w-3 h-3 mr-1" />
                     Active
@@ -209,7 +150,7 @@ const BotManagement: React.FC = () => {
                 </div>
                 
                 <div className="flex space-x-2 pt-3 border-t">
-                  {bot.id !== botConfig.id && (
+                  {bot.id !== botConfig?.id && (
                     <Button 
                       size="sm" 
                       variant="outline"
@@ -221,7 +162,7 @@ const BotManagement: React.FC = () => {
                     </Button>
                   )}
                   
-                  {bot.id === botConfig.id && (
+                  {bot.id === botConfig?.id && (
                     <Button 
                       size="sm" 
                       variant="outline"

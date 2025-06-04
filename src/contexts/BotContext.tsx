@@ -81,14 +81,14 @@ export const BotProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     ));
   };
 
-  const createNewBot = (name: string): boolean => {
+  const createNewBot = (name: string, welcomeMessage?: string, tone?: 'friendly' | 'formal' | 'neutral'): boolean => {
     if (!canCreateBot()) return false;
 
     const newBot: BotConfig = {
       id: Date.now().toString(),
       name,
-      welcomeMessage: 'Hello! How can I help you today?',
-      tone: 'friendly',
+      welcomeMessage: welcomeMessage || 'Hello! How can I help you today?',
+      tone: tone || 'friendly',
       isActive: false,
       createdAt: new Date().toISOString(),
     };

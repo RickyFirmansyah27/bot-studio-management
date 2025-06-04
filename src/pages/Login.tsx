@@ -7,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Bot, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Data dummy untuk testing
 const DUMMY_USERS = [
-  { email: 'user@free.com', password: 'password123', plan: 'free' },
-  { email: 'user@premium.com', password: 'password123', plan: 'premium' },
-  { email: 'admin@test.com', password: 'admin123', plan: 'premium' }
+  { email: 'user@free.com', password: 'password123', plan: 'free', name: 'Free User' },
+  { email: 'user@premium.com', password: 'password123', plan: 'premium', name: 'Premium User' },
+  { email: 'admin@test.com', password: 'admin123', plan: 'premium', name: 'Admin User' }
 ];
 
 const Login: React.FC = () => {
@@ -22,6 +23,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +35,16 @@ const Login: React.FC = () => {
     const user = DUMMY_USERS.find(u => u.email === email && u.password === password);
     
     if (user) {
-      // Simpan data user di localStorage untuk dummy auth
-      localStorage.setItem('currentUser', JSON.stringify(user));
+      // Login menggunakan AuthContext
+      login({
+        email: user.email,
+        name: user.name,
+        plan: user.plan as 'free' | 'premium'
+      });
       
       toast({
         title: "Login Berhasil",
-        description: `Selamat datang! Plan Anda: ${user.plan}`,
+        description: `Selamat datang ${user.name}! Plan Anda: ${user.plan}`,
       });
       
       navigate('/');
