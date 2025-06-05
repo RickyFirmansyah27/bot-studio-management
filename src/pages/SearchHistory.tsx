@@ -74,7 +74,7 @@ const SearchHistory: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-6 py-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Search History</h1>
         <p className="text-gray-600 mt-2">Search and filter through conversation history</p>
@@ -148,6 +148,7 @@ const SearchHistory: React.FC = () => {
         </CardContent>
       </Card>
 
+      <div className='h-4'/>
       {/* Search Results */}
       <Card>
         <CardHeader>

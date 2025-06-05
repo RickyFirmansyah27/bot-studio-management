@@ -90,7 +90,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-6 py-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <p className="text-gray-600 mt-2">Monitor and manage chatbot interactions</p>
@@ -115,6 +115,8 @@ const AdminDashboard: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      <div className='h-4'/>
 
       {/* Recent Conversations */}
       <Card>

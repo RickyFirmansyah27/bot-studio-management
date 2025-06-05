@@ -91,7 +91,7 @@ const MessageVolume: React.FC = () => {
   const stats = getCurrentStats();
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-6 py-8">
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Message Volume</h1>
@@ -172,8 +172,7 @@ const MessageVolume: React.FC = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Volume Trend */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
         <Card>
           <CardHeader>
             <CardTitle>Message Volume Trend</CardTitle>

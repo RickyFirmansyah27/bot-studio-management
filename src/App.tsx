@@ -19,6 +19,7 @@ import TotalUsers from "./pages/analytics/TotalUsers";
 import ActiveSessions from "./pages/analytics/ActiveSessions";
 import MessageVolume from "./pages/analytics/MessageVolume";
 import BotManagement from "./pages/BotManagement";
+import Options from "./pages/Options";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="/analytics/users" element={<TotalUsers />} />
                 <Route path="/analytics/sessions" element={<ActiveSessions />} />
                 <Route path="/analytics/messages" element={<MessageVolume />} />
+                <Route path="/settings" element={<Options />} />
               </Route>
               
               {/* 404 Route */}
